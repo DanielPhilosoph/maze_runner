@@ -1,49 +1,59 @@
+const fs = require("fs");
+const path = require("path");
+function findTreasureSync(roomPath) {
+  drawMapSync(roomPath.toString());
+  let mazeArray = fs.readdirSync(roomPath);
+  for (let elem of mazeArray) {
+    console.log(elem);
+
+    if (elem.split("-")[0] === "chest") {
+      let nextRoom = openChestSync(roomPath + "/" + elem);
+
+      console.log(nextRoom);
+      if (nextRoom === "treasure") {
+        drawMapSync("🏆");
+        return "YAY";
+      }
+      if (nextRoom) {
+        return findTreasureSync(nextRoom);
+      } else {
+        continue;
+      }
+    }
+  }
+}
+
+function drawMapSync(currentRoomPath) {
+  fs.appendFileSync("./map.txt", currentRoomPath + "\n");
+}
+
+// openChestSync      ==> chestPath = "./maze/room-1/room-0/chest-1.json" <===
+// return "PATH_ROOM"    ==> "./maze/room-1.../room" <==
 function openChestSync(chestPath) {
   let chestContentJSON = "";
   try {
     let chestContent = fs.readFileSync(chestPath);
-    chestContentJSON = JSON.stringify(chestContent.toString());
+    chestContentJSON = JSON.parse(chestContent.toString());
+    if (chestContentJSON.hasOwnProperty("treasure")) {
+      return "treasure";
+    }
+    if (validateChestContent(chestContentJSON)) {
+      return chestContentJSON.clue;
+    } else {
+      return false;
+    }
   } catch (err) {
-    return false;
-  }
-  if (validateChestContent(chestContentJSON)) {
-    return chestContentJSON;
-  } else {
     return false;
   }
 }
 
 function validateChestContent(chestText) {
   try {
-    let chestContent = fs.readFileSync(JSON.parse(chestText).clue);
+    fs.readdirSync(chestText.clue);
+    return true;
   } catch (error) {
     return false;
   }
-  return true;
 }
 
-function findTreasureSync(roomPath) {
-  let mazeArray = fs.readdirSync(roomPath);
-  if (isTreasure(openChestSync(roomPath))) {
-    return "FOUND";
-  }
-  for (let elem of mazeArray) {
-    //console.log(elem);
-    if (openChestSync("./maze/" + elem)) {
-      findTreasureSync(openChestSync("./maze/" + elem));
-    }
-  }
-}
-
-function isTreasure(content) {
-  if (JSON.parse(content).hasOwnProperty("treasure")) {
-    return true;
-  }
-  return false;
-}
-
-function drawMapSync(currentRoomPath) {}
-
-//console.log(findTreasureSync("./maze"));
-console.log(openChestSync("./maze/chest-1.json"));
-console.log(validateChestContent("./maze/room-1/room-0"));
+console.log(findTreasureSync("./maze"));
