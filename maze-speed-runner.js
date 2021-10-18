@@ -4,12 +4,8 @@ function findTreasureSync(roomPath) {
   drawMapSync(roomPath.toString());
   let mazeArray = fs.readdirSync(roomPath);
   for (let elem of mazeArray) {
-    console.log(elem);
-
     if (elem.split("-")[0] === "chest") {
       let nextRoom = openChestSync(roomPath + "/" + elem);
-
-      console.log(nextRoom);
       if (nextRoom === "treasure") {
         drawMapSync("🏆");
         return "YAY";
