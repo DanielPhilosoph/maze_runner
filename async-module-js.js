@@ -2,21 +2,25 @@ const fs = require("fs");
 const path = require("path");
 function findTreasure(roomPath) {
   drawMap(roomPath.toString());
-  let mazeArray = fs.readdirSync(roomPath);
-  for (let elem of mazeArray) {
-    if (elem.split("-")[0] === "chest") {
-      openChest(roomPath + "/" + elem).then((nextRoom) => {
-        if (nextRoom) {
-          if (nextRoom === "treasure") {
-            drawMap("🏆");
-            return;
-          } else {
-            return findTreasure(nextRoom);
-          }
-        }
-      });
+  fs.readdir(roomPath, (err, mazeArray) => {
+    if (err) {
+      return;
     }
-  }
+    for (let elem of mazeArray) {
+      if (elem.split("-")[0] === "chest") {
+        openChest(roomPath + "/" + elem).then((nextRoom) => {
+          if (nextRoom) {
+            if (nextRoom === "treasure") {
+              drawMap("🏆");
+              return;
+            } else {
+              return findTreasure(nextRoom);
+            }
+          }
+        });
+      }
+    }
+  });
 }
 
 function drawMap(currentRoomPath) {
