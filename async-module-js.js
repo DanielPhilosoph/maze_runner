@@ -1,15 +1,14 @@
-"use strict";
 const fs = require("fs");
 const path = require("path");
 function findTreasure(roomPath) {
-  drawMapSync(roomPath.toString());
+  drawMap(roomPath.toString());
   let mazeArray = fs.readdirSync(roomPath);
   for (let elem of mazeArray) {
     if (elem.split("-")[0] === "chest") {
       openChest(roomPath + "/" + elem).then((nextRoom) => {
         if (nextRoom) {
           if (nextRoom === "treasure") {
-            drawMapSync("🏆");
+            drawMap("🏆");
             return;
           } else {
             return findTreasure(nextRoom);
@@ -20,8 +19,12 @@ function findTreasure(roomPath) {
   }
 }
 
-function drawMapSync(currentRoomPath) {
-  fs.appendFileSync("./map.txt", currentRoomPath + "\n");
+function drawMap(currentRoomPath) {
+  fs.appendFile("./map.txt", currentRoomPath + "\n", (err) => {
+    if (err) {
+      return;
+    }
+  });
 }
 
 // openChestSync      ==> chestPath = "./maze/room-1/room-0/chest-1.json" <===
